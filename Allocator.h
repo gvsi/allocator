@@ -100,7 +100,7 @@ private:
   * O(1) in time
   * https://code.google.com/p/googletest/wiki/AdvancedGuide#Private_Class_Members
   */
-  // FRIEND_TEST(TestAllocator2, index);
+  FRIEND_TEST(TestAllocator2, index);
   int &operator[](int i) { return *reinterpret_cast<int *>(&a[i]); }
 
 public:
