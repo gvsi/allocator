@@ -235,7 +235,48 @@ public:
   * <your documentation>
   */
   void deallocate(pointer p, size_type) {
-    // <your code>
+    if (p == nullptr) {
+      return;
+    }
+
+    assert(valid());
+
+    int* first_sent_ptr = reinterpret_cast<int*>(p) - 1;
+    char* first_sent_char_ptr = reinterpret_cast<char*>(first_sent_ptr);
+    int* second_sent_ptr = reinterpret_cast<int*>(first_sent_char_ptr + *first_sent_ptr * -1 + 4);
+
+    assert(*first_sent_ptr == *second_sent_ptr);
+    bool is_first_block = first_sent_ptr == reinterpret_cast<int*>(a);
+    bool is_last_block = second_sent_ptr == reinterpret_cast<int*>(a+N) - 1;
+
+    std::cout << "is_first_block: " << is_first_block << ", " << "is_last_block: " << is_last_block << std::endl;
+
+    int freed_bytes = *first_sent_ptr * -1;
+    int* lower_bound_sent = first_sent_ptr;
+    int* upper_bound_sent = second_sent_ptr;
+
+    if (!is_first_block) {
+      int* prev_ptr = first_sent_ptr - 1;
+      if (*prev_ptr > 0) { // coalesce
+        freed_bytes += *prev_ptr + 8;
+        lower_bound_sent = reinterpret_cast<int*>(reinterpret_cast<char*>(prev_ptr) - *prev_ptr - 4);
+        assert(*lower_bound_sent == *prev_ptr);
+      }
+    }
+
+    if (!is_last_block) {
+      int* next_ptr = second_sent_ptr + 1;
+      if (*next_ptr > 0) { // coalesce
+        freed_bytes += *next_ptr + 8;
+        upper_bound_sent = reinterpret_cast<int*>(reinterpret_cast<char*>(next_ptr) + *next_ptr + 4);
+        assert(*upper_bound_sent == *next_ptr);
+      }
+    }
+
+    // Set the values of the resized sentinels
+    *lower_bound_sent = freed_bytes;
+    *upper_bound_sent = freed_bytes;
+
     assert(valid());
   }
 
