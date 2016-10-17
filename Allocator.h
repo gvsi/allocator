@@ -78,9 +78,26 @@ private:
     const char *first_sent_ptr = &a[0];
     const char *second_sent_ptr = &a[abs(a[0]) + 4];
 
+    bool block_is_free = false;
     while (first_sent_ptr < a + N) {
       const int *p = (int *)(first_sent_ptr);
       const int *q = (int *)(second_sent_ptr);
+
+      if (*p == 0) { // invalid empty block
+        return false;
+      }
+
+      if (*p > 0) {
+        if (block_is_free) { // Found two adjacent blocks
+          return false;
+        }
+        block_is_free = true;
+      } else {
+        block_is_free = false;
+      }
+
+
+
       if (*p != *q) {
         std::cout << "NO! " << *p << "!=" << *q << std::endl;
         return false;
@@ -88,6 +105,7 @@ private:
         std::cout << "YES! " << *p << "==" << *q << std::endl;
       }
 
+      // increment sentinels
       first_sent_ptr = second_sent_ptr + 4;
       second_sent_ptr = first_sent_ptr + abs(*(int *)(first_sent_ptr)) + 4;
     }
