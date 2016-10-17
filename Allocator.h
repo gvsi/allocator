@@ -157,10 +157,57 @@ public:
   * throw a bad_alloc exception, if n is invalid
   */
   pointer allocate(size_type n) {
-    
+    int min_block_size = sizeof(value_type) + (2 * sizeof(int)); // 16
+    int alloc_req_bytes = n * sizeof(value_type);                // 24
+    int min_req_bytes = n * sizeof(value_type) + min_block_size; // 40
 
-    return 0;
-    return nullptr;
+    char *first_sent_ptr = &a[0];
+    char *second_sent_ptr = &a[abs(a[0]) + 4];
+
+    while (first_sent_ptr < a + N) {
+      int *p = (int *)(first_sent_ptr);
+      int *q = (int *)(second_sent_ptr);
+
+      if (*p == alloc_req_bytes) { // user gets exactly what was requested
+        std::cout << "1- Found a block! Size: " << *p << std::endl;
+        *p = *p * -1;
+        *q = *q * -1;
+
+        assert(valid());
+        return reinterpret_cast<pointer>(p + 1);
+      } else if (*p > alloc_req_bytes &&
+                 *p < min_req_bytes) { // user gets more than what was requested
+        std::cout << "2- Found a block! Size: " << *p << std::endl;
+        *p = *p * -1;
+        *q = *q * -1;
+
+        assert(valid());
+        return reinterpret_cast<pointer>(p + 1);
+      } else if (*p > min_req_bytes) { // user gets exactly what was requested
+        std::cout << "3- Found a block! Size: " << *p << std::endl;
+        int remaining_free_bytes =
+            *p - alloc_req_bytes - 8; // the bytes that will be free on the
+                                      // adjancent block on the right (value
+                                      // will be displayed on the new sentinels)
+        *p = alloc_req_bytes * -1;
+        *reinterpret_cast<int *>(first_sent_ptr + 4 + alloc_req_bytes) =
+            alloc_req_bytes * -1; // sets new sentinel
+
+        // reinterpret_cast<const int *>(&a[i]);
+        *reinterpret_cast<int *>(first_sent_ptr + 4 + alloc_req_bytes + 4) = remaining_free_bytes;
+        *q = remaining_free_bytes;
+
+        assert(valid());
+        return reinterpret_cast<pointer>(p + 1);
+      }
+
+      // increment sentinels
+      first_sent_ptr = second_sent_ptr + 4;
+      second_sent_ptr = first_sent_ptr + abs(*(int *)(first_sent_ptr)) + 4;
+    }
+
+    std::bad_alloc exception;
+    throw exception;
   }
 
   // ---------
