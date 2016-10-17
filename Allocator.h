@@ -60,11 +60,6 @@ private:
 
   char a[N];
 
-  void print_array() {
-    for (int i = 0; i < N; ++i) {
-      std::cout << i << ": " << (*this)[i] << " " << std::endl;
-    }
-  }
   // -----
   // valid
   // -----
@@ -216,6 +211,12 @@ public:
   */
 
   const int &get(int i) const { return *reinterpret_cast<const int *>(&a[i]); }
+
+  void print_array() {
+    for (int i = 0; i < N; ++i) {
+      std::cout << i << ": " << (*this)[i] << " " << std::endl;
+    }
+  }
 
   const int &operator[](int i) const {
     return *reinterpret_cast<const int *>(&a[i]);
