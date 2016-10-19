@@ -70,6 +70,7 @@ private:
   * O(n) in time
   * <your documentation>
   */
+  // FRIEND_TYPED_TEST(TestAllocator4, valid_1);
   bool valid() const {
     const char *first_sent_ptr = a;
     const int *first_sent_int = reinterpret_cast<const int*>(first_sent_ptr);
@@ -159,6 +160,11 @@ public:
   * throw a bad_alloc exception, if n is invalid
   */
   pointer allocate(size_type n) {
+    if (n < 1) {
+      std::bad_alloc exception;
+      throw exception;
+    }
+
     int min_block_size = sizeof(value_type) + (2 * sizeof(int)); // 16
     int alloc_req_bytes = n * sizeof(value_type);                // 24
     int min_req_bytes = n * sizeof(value_type) + min_block_size; // 40

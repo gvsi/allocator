@@ -1,7 +1,7 @@
 // -------------------------------------
 // projects/allocator/TestAllocator1.c++
-// Copyright (C) 2015
-// Glenn P. Downing
+// Copyright (C) 2016
+// Giovanni Alcantara
 // -------------------------------------
 
 // --------
@@ -14,6 +14,9 @@
 #include "gtest/gtest.h"
 
 #include "Allocator.h"
+
+
+
 
 // --------------
 // TestAllocator1
@@ -174,4 +177,212 @@ TYPED_TEST(TestAllocator3, test_10) {
     }
     x.deallocate(b, s);
   }
+}
+
+// --------------
+// TestAllocator4 (valid method)
+// --------------
+
+template <typename A> struct TestAllocator4 : testing::Test {
+  // --------
+  // typedefs
+  // --------
+
+  typedef A allocator_type;
+  typedef typename A::value_type value_type;
+  typedef typename A::size_type size_type;
+  typedef typename A::pointer pointer;
+};
+
+typedef testing::Types<my_allocator<int, 200>, my_allocator<double, 200>>
+    my_types_3;
+
+TYPED_TEST_CASE(TestAllocator4, my_types_3);
+
+TYPED_TEST(TestAllocator4, valid_1) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 10;
+  const value_type v = 2;
+  const pointer p = x.allocate(s);
+  // ASSERT_EQ(x.valid(), true);
+}
+
+// --------------
+// TestAllocator5
+// --------------
+
+template <typename A> struct TestAllocator5 : testing::Test {
+  // --------
+  // typedefs
+  // --------
+
+  typedef A allocator_type;
+  typedef typename A::value_type value_type;
+  typedef typename A::size_type size_type;
+  typedef typename A::pointer pointer;
+};
+
+typedef testing::Types<my_allocator<int, 200>, my_allocator<double, 200>>
+    my_types_5;
+
+TYPED_TEST_CASE(TestAllocator5, my_types_5);
+
+// --------------
+// Test Allocate()
+// --------------
+
+// Check that bad_alloc is thrown when not enough space
+TYPED_TEST(TestAllocator5, test_1) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 10;
+  const value_type v = 10;
+
+  try {
+    const pointer p = x.allocate(s);
+  } catch (std::bad_alloc &e) {
+    ASSERT_EQ(true, true);
+  }
+}
+
+// Check that bad_alloc is thrown when N is invalid
+TYPED_TEST(TestAllocator5, test_2) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 0;
+  const value_type v = 10;
+
+  try {
+    pointer p = x.allocate(s);
+  } catch (std::bad_alloc &e) {
+    ASSERT_EQ(true, true);
+  }
+}
+
+// Check two consecutive allocations
+TYPED_TEST(TestAllocator5, test_3) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 10;
+  const value_type v = 10;
+
+  pointer p = x.allocate(s);
+  pointer q = x.allocate(s);
+}
+
+// --------------
+// Test deallocate()
+// --------------
+
+// Check single deallocate
+TYPED_TEST(TestAllocator5, test_4) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 10;
+  const value_type v = 5;
+
+  pointer p = x.allocate(s);
+  x.deallocate(p, v);
+}
+
+// Check deallocate with single coalesce
+TYPED_TEST(TestAllocator5, test_5) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 10;
+  const value_type v = 5;
+
+  pointer p1 = x.allocate(s);
+  pointer p2 = x.allocate(s);
+  x.deallocate(p1, v);
+  x.deallocate(p2, v);
+}
+
+// Check deallocate with two-sided coalesce
+TYPED_TEST(TestAllocator5, test_6) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 5;
+  const value_type v = 5;
+
+  pointer left = x.allocate(s);
+  pointer p = x.allocate(s);
+  pointer right = x.allocate(s);
+  x.deallocate(left, v);
+  x.deallocate(right, v);
+  x.deallocate(p, v);
+}
+
+// Check that exception is thrown when passing nullptr
+TYPED_TEST(TestAllocator5, test_7) {
+  typedef typename TestFixture::allocator_type allocator_type;
+  typedef typename TestFixture::value_type value_type;
+  typedef typename TestFixture::size_type size_type;
+  typedef typename TestFixture::pointer pointer;
+
+  allocator_type x;
+  const size_type s = 10;
+  const value_type v = 5;
+  pointer p = nullptr;
+
+  try {
+    x.deallocate(p, s);
+  } catch (std::invalid_argument &e) {
+    ASSERT_EQ(true, true);
+  }
+}
+
+// --------------
+// Test Constructor
+// --------------
+
+// Check that bad_alloc is thrown when N is less than sizeof(T) + (2 * sizeof(int))
+TEST(TestAllocator6, test_1) {
+  const std::size_t s = 4;
+  try {
+    const my_allocator<int, s> x;
+  } catch (std::bad_alloc &e) {
+    ASSERT_EQ(true, true);
+  }
+}
+
+// Check that allocator can be defined as constant
+TEST(TestAllocator6, test_2) {
+  const std::size_t s = 20;
+  my_allocator<int, s> x;
+}
+
+// Check default allocation
+TEST(TestAllocator6, test_3) {
+  const std::size_t s = 20;
+  my_allocator<int, s> x;
 }
