@@ -68,7 +68,10 @@ private:
   /**
   * O(1) in space
   * O(n) in time
-  * <your documentation>
+  * Checks validity of the data
+  * Checks that sentinels congruence of values and locations
+  * Checks that there are no two consecutive free blocks, as this signals a
+  * failure in coalescing
   */
   FRIEND_TEST(TestAllocator4, test_1);
   FRIEND_TEST(TestAllocator4, test_2);
@@ -124,6 +127,7 @@ public:
   * O(1) in space
   * O(1) in time
   * throw a bad_alloc exception, if N is less than sizeof(T) + (2 * sizeof(int))
+  * Initializes allocator by setting first and last sentinel
   */
   my_allocator() {
     if (N < sizeof(T) + (2 * sizeof(int))) {
@@ -131,8 +135,8 @@ public:
       throw exception;
     }
 
-    (*this)[0] = N - 8;
-    (*this)[N - 4] = N - 8;
+    (*this)[0] = (int)N - 8;
+    (*this)[N - 4] = (int)N - 8;
 
     assert(valid());
   }
@@ -237,9 +241,10 @@ public:
   /**
   * O(1) in space
   * O(1) in time
-  * after deallocation adjacent free blocks must be coalesced
-  * throw an invalid_argument exception, if p is invalid
-  * <your documentation>
+  * Deallocates a block by changing its sentinel to positive
+  * If adjacent (left and right blocks) are free blocks, it coalesce those into
+  * a unique free block
+  * Throws an invalid_argument exception, if p is invalid
   */
   void deallocate(pointer p, size_type) {
     if (p == nullptr) {
