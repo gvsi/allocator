@@ -180,36 +180,28 @@ TYPED_TEST(TestAllocator3, test_10) {
 }
 
 // --------------
-// TestAllocator4 (valid method)
+// Test valid()
 // --------------
 
-template <typename A> struct TestAllocator4 : testing::Test {
-  // --------
-  // typedefs
-  // --------
+// Test validity after construction
+TEST(TestAllocator4, test_1) {
+  my_allocator<int, 200> x;
+  ASSERT_EQ(x.valid(), true);
+}
 
-  typedef A allocator_type;
-  typedef typename A::value_type value_type;
-  typedef typename A::size_type size_type;
-  typedef typename A::pointer pointer;
-};
+// Test validity after allocation
+TEST(TestAllocator4, test_2) {
+  my_allocator<int, 200> x;
+  x.allocate(10);
+  ASSERT_EQ(x.valid(), true);
+}
 
-typedef testing::Types<my_allocator<int, 200>, my_allocator<double, 200>>
-    my_types_3;
-
-TYPED_TEST_CASE(TestAllocator4, my_types_3);
-
-TYPED_TEST(TestAllocator4, valid_1) {
-  typedef typename TestFixture::allocator_type allocator_type;
-  typedef typename TestFixture::value_type value_type;
-  typedef typename TestFixture::size_type size_type;
-  typedef typename TestFixture::pointer pointer;
-
-  allocator_type x;
-  const size_type s = 10;
-  const value_type v = 2;
-  const pointer p = x.allocate(s);
-  // ASSERT_EQ(x.valid(), true);
+// Test validity after deallocation
+TEST(TestAllocator4, test_3) {
+  my_allocator<int, 200> x;
+  int *p = x.allocate(10);
+  x.deallocate(p, 10);
+  ASSERT_EQ(x.valid(), true);
 }
 
 // --------------

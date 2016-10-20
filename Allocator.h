@@ -70,7 +70,9 @@ private:
   * O(n) in time
   * <your documentation>
   */
-  // FRIEND_TYPED_TEST(TestAllocator4, valid_1);
+  FRIEND_TEST(TestAllocator4, test_1);
+  FRIEND_TEST(TestAllocator4, test_2);
+  FRIEND_TEST(TestAllocator4, test_3);
   bool valid() const {
     const char *first_sent_ptr = a;
     const int *first_sent_int = reinterpret_cast<const int*>(first_sent_ptr);
