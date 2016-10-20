@@ -75,13 +75,13 @@ private:
   FRIEND_TEST(TestAllocator4, test_3);
   bool valid() const {
     const char *first_sent_ptr = a;
-    const int *first_sent_int = reinterpret_cast<const int*>(first_sent_ptr);
+    const int *first_sent_int = reinterpret_cast<const int *>(first_sent_ptr);
     const char *second_sent_ptr = first_sent_ptr + abs(*first_sent_int) + 4;
 
     bool block_is_free = false;
     while (first_sent_ptr < a + N - 4) {
-      const int *p = reinterpret_cast<const int*>(first_sent_ptr);
-      const int *q = reinterpret_cast<const int*>(second_sent_ptr);
+      const int *p = reinterpret_cast<const int *>(first_sent_ptr);
+      const int *q = reinterpret_cast<const int *>(second_sent_ptr);
 
       if (*p == 0) { // invalid empty block
         return false;
@@ -96,8 +96,6 @@ private:
         block_is_free = false;
       }
 
-
-
       if (*p != *q) {
         // std::cout << "NO! " << *p << "!=" << *q << std::endl;
         return false;
@@ -109,7 +107,7 @@ private:
       first_sent_ptr = second_sent_ptr + 4;
       second_sent_ptr = first_sent_ptr + abs(*(int *)(first_sent_ptr)) + 4;
     }
-    //std::cout << "VALID!" << std::endl;
+    // std::cout << "VALID!" << std::endl;
     return true;
   }
 
@@ -140,7 +138,7 @@ public:
     (*this)[0] = N - 8;
     (*this)[N - 4] = N - 8;
 
-    //print_array();
+    // print_array();
 
     assert(valid());
   }
@@ -172,15 +170,16 @@ public:
     int min_req_bytes = n * sizeof(value_type) + min_block_size; // 40
 
     char *first_sent_ptr = a;
-    int *first_sent_int = reinterpret_cast<int*>(first_sent_ptr);
+    int *first_sent_int = reinterpret_cast<int *>(first_sent_ptr);
     char *second_sent_ptr = first_sent_ptr + abs(*first_sent_int) + 4;
 
     // Check that the values in the two sentinels are the same
-    assert(*reinterpret_cast<int*>(first_sent_ptr) == *reinterpret_cast<int*>(second_sent_ptr));
+    assert(*reinterpret_cast<int *>(first_sent_ptr) ==
+           *reinterpret_cast<int *>(second_sent_ptr));
 
     while (first_sent_ptr < a + N - 4) {
-      int *p = reinterpret_cast<int*>(first_sent_ptr);
-      int *q = reinterpret_cast<int*>(second_sent_ptr);
+      int *p = reinterpret_cast<int *>(first_sent_ptr);
+      int *q = reinterpret_cast<int *>(second_sent_ptr);
       assert(*p == *q);
 
       if (*p == alloc_req_bytes) { // user gets exactly what was requested
@@ -207,7 +206,8 @@ public:
         *reinterpret_cast<int *>(first_sent_ptr + 4 + alloc_req_bytes) =
             alloc_req_bytes * -1; // sets new sentinel
 
-        *reinterpret_cast<int *>(first_sent_ptr + 4 + alloc_req_bytes + 4) = remaining_free_bytes;
+        *reinterpret_cast<int *>(first_sent_ptr + 4 + alloc_req_bytes + 4) =
+            remaining_free_bytes;
         *q = remaining_free_bytes;
 
         assert(valid());
@@ -255,9 +255,10 @@ public:
 
     assert(valid());
 
-    int* first_sent_ptr = reinterpret_cast<int*>(p) - 1;
-    char* first_sent_char_ptr = reinterpret_cast<char*>(first_sent_ptr);
-    int* second_sent_ptr = reinterpret_cast<int*>(first_sent_char_ptr + abs(*first_sent_ptr) + 4);
+    int *first_sent_ptr = reinterpret_cast<int *>(p) - 1;
+    char *first_sent_char_ptr = reinterpret_cast<char *>(first_sent_ptr);
+    int *second_sent_ptr =
+        reinterpret_cast<int *>(first_sent_char_ptr + abs(*first_sent_ptr) + 4);
 
     if (*first_sent_ptr != *second_sent_ptr) {
       std::cout << *first_sent_ptr << " " << *second_sent_ptr << std::endl;
@@ -265,33 +266,35 @@ public:
     assert(*first_sent_ptr == *second_sent_ptr);
 
     // Check whether there are adjancent blocks
-    bool is_first_block = first_sent_ptr == reinterpret_cast<int*>(a);
-    bool is_last_block = second_sent_ptr == reinterpret_cast<int*>(a+N) - 1;
+    bool is_first_block = first_sent_ptr == reinterpret_cast<int *>(a);
+    bool is_last_block = second_sent_ptr == reinterpret_cast<int *>(a + N) - 1;
 
     // Keeps track of all the bytes that we free after potential coalescing
     int freed_bytes = abs(*first_sent_ptr);
 
     if (!is_first_block) {
-      int* prev_ptr = first_sent_ptr - 1;
+      int *prev_ptr = first_sent_ptr - 1;
       if (*prev_ptr > 0) { // we can coalesce with previous block
         // Increment freed bytes counter by size of adjacent free block
         freed_bytes += *prev_ptr + 8;
 
         // Shift lower bound sentinel to previous block
-        first_sent_ptr = reinterpret_cast<int*>(reinterpret_cast<char*>(prev_ptr) - *prev_ptr - 4);
+        first_sent_ptr = reinterpret_cast<int *>(
+            reinterpret_cast<char *>(prev_ptr) - *prev_ptr - 4);
         assert(*first_sent_ptr > 0);
         assert(*first_sent_ptr == *prev_ptr);
       }
     }
 
     if (!is_last_block) {
-      int* next_ptr = second_sent_ptr + 1;
+      int *next_ptr = second_sent_ptr + 1;
       if (*next_ptr > 0) { // we can coalesce with next block
         // Increment freed bytes counter by size of adjacent free block
         freed_bytes += *next_ptr + 8;
 
         // Shift upper bound sentinel to next block
-        second_sent_ptr = reinterpret_cast<int*>(reinterpret_cast<char*>(next_ptr) + *next_ptr + 4);
+        second_sent_ptr = reinterpret_cast<int *>(
+            reinterpret_cast<char *>(next_ptr) + *next_ptr + 4);
         assert(*second_sent_ptr > 0);
         assert(*second_sent_ptr == *next_ptr);
       }
@@ -302,7 +305,6 @@ public:
     *second_sent_ptr = freed_bytes;
 
     assert(valid());
-
   }
 
   // -------

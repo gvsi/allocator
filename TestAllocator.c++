@@ -15,9 +15,6 @@
 
 #include "Allocator.h"
 
-
-
-
 // --------------
 // TestAllocator1
 // --------------
@@ -357,7 +354,8 @@ TYPED_TEST(TestAllocator5, test_7) {
 // Test Constructor
 // --------------
 
-// Check that bad_alloc is thrown when N is less than sizeof(T) + (2 * sizeof(int))
+// Check that bad_alloc is thrown when N is less than sizeof(T) + (2 *
+// sizeof(int))
 TEST(TestAllocator6, test_1) {
   const std::size_t s = 4;
   try {
