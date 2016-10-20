@@ -97,17 +97,13 @@ private:
       }
 
       if (*p != *q) {
-        // std::cout << "NO! " << *p << "!=" << *q << std::endl;
         return false;
-      } else {
-        // std::cout << "YES! " << *p << "==" << *q << std::endl;
       }
 
       // increment sentinels
       first_sent_ptr = second_sent_ptr + 4;
       second_sent_ptr = first_sent_ptr + abs(*(int *)(first_sent_ptr)) + 4;
     }
-    // std::cout << "VALID!" << std::endl;
     return true;
   }
 
@@ -137,8 +133,6 @@ public:
 
     (*this)[0] = N - 8;
     (*this)[N - 4] = N - 8;
-
-    // print_array();
 
     assert(valid());
   }
@@ -324,16 +318,6 @@ public:
   * O(1) in space
   * O(1) in time
   */
-
-  const int &get(int i) const { return *reinterpret_cast<const int *>(&a[i]); }
-
-  void print_array() {
-    for (int i = 0; i < N; ++i) {
-      std::cout << i << ": " << (*this)[i] << " " << std::endl;
-    }
-    std::cout << std::endl << std::endl;
-  }
-
   const int &operator[](int i) const {
     return *reinterpret_cast<const int *>(&a[i]);
   }
