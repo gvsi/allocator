@@ -6,6 +6,8 @@ FILES :=                                  \
     .gitignore                            \
     Allocator.h                           \
     makefile                              \
+		Allocator.log \
+		html \
     TestAllocator.c++                     \
     TestAllocator.out
 
@@ -145,8 +147,7 @@ status:
 	git remote -v
 	git status
 
-# test: html Allocator.log TestAllocator.tmp allocator-tests check
-test: TestAllocator.tmp allocator-tests check
+test: html Allocator.log TestAllocator.tmp allocator-tests check
 
 versions:
 	which make
