@@ -5,9 +5,9 @@
 FILES :=                                  \
     .gitignore                            \
     Allocator.h                           \
-    Allocator.log                         \
-    html                                  \
     makefile                              \
+		Allocator.log \
+		html \
     TestAllocator.c++                     \
     TestAllocator.out
 
@@ -77,6 +77,12 @@ Allocator.log:
 
 Doxyfile:
 	doxygen -g
+
+RunAllocator: Allocator.h RunAllocator.c++
+	$(CXX) $(CXXFLAGS) Allocator.h RunAllocator.c++ -o RunAllocator
+
+RunAllocator.tmp: RunAllocator
+	./RunAllocator
 
 # Make the following edits to Doxyfile.
 # EXTRACT_ALL            = YES
